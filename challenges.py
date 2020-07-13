@@ -77,7 +77,8 @@ def knapsack_dp(items, capacity):
                 dp_table[i][j] = max(value_with, value_without)
 
     return dp_table[rows-1][cols-1]
-    
+
+@Memoize    
 def edit_distance(str1, str2):
     """Compute the Edit Distance between 2 strings."""
 
@@ -87,27 +88,51 @@ def edit_distance(str1, str2):
     
     # If last char in string match, chop it and recurse
     if str1[-1] == str2[-1]:
-        return edit_distance(str1[:-1], str[:-1])
+        return edit_distance(str1[:-1], str2[:-1])
     else:
         # return 1 + min of insert, delete, replace
         insert = edit_distance(str1, str2[:-1])
         delete = edit_distance(str1[:-1], str2)
         replace = edit_distance(str1[:-1], str2[:-1])
-        
-        return 1+ min(insert, delete, replace)
 
-
-
-    
-
+        return 1 + min(insert, delete, replace)
 
 def edit_distance_dp(str1, str2):
     """Compute the Edit Distance between 2 strings."""
     rows = len(str1) + 1
     cols = len(str2) + 1
+
     dp_table = [[0 for j in range(cols)] for i in range(rows)]
 
-    # TODO: Fill in the table using a nested for loop.
+    # Base Cases
+    if len(str1) == 0 or len(str2) == 0:
+        return len(str1) + len(str2)
+
+    # Fill in the table using a nested for loop.
+    for i in range(rows):
+        for j in range(cols):
+            # If first string is empty, only option is to 
+            # insert all characters of second string 
+            if i == 0:
+                dp_table[i][j] = j
+
+            # If second string is empty, only option is to 
+            # remove all characters of second string 
+            elif j == 0:
+                dp_table[i][j] = i
+
+            # If last characters are same, ignore last char 
+            # and recur for remaining string 
+            elif str1[i-1] == str2[j-1]:
+                dp_table[i][j] = dp_table[i-1][j-1]
+            
+            # If last character are different, consider all 
+            # possibilities and find minimum    
+            else:
+                insert = dp_table[i - 1][j]
+                remove = dp_table[i][j - 1]
+                replace = dp_table[i - 1][j - 1]
+                dp_table[i][j] = 1 + min(insert, remove, replace)
 
     return dp_table[rows-1][cols-1]
 
